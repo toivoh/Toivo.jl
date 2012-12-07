@@ -1,7 +1,7 @@
 
 module Toivo
 using Base 
-export @show, @expect, quot, is_expr, split_fdef, @sexpr, show_sexpr
+export @show, @expect, quot, is_expr, split_fdef, @in, @sexpr, show_sexpr
 
 macro expect(pred)
     quote
@@ -26,6 +26,12 @@ function split_fdef(fdef::Expr)
     (signature, body)
 end
 split_fdef(f::Any) = error("split_fdef: expected function definition, got\n$f")
+
+macro in(mod, ex)
+    quote
+        $mod.eval($(expr(:quote,ex)))
+    end
+end
 
 macro sexpr(ex)
     esc(sexpr_to_expr(ex))
