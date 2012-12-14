@@ -3,6 +3,7 @@ module Toivo
 using Base 
 export quot, is_expr, @sexpr, show_sexpr
 export @expect, split_fdef, @in
+export get!, @get, @get!
 
 
 # ---- Metaprogramming --------------------------------------------------------
@@ -68,7 +69,7 @@ end
 
 macro expect(pred)
     quote
-        $pred ? nothing : error(
+        $(esc(pred)) ? nothing : error(
           $(string("expected: ", sprint(Base.show_unquoted, pred)", == true")))
     end
 end
@@ -90,5 +91,21 @@ macro in(mod, ex)
         $mod.eval($(expr(:quote,ex)))
     end
 end
+
+# todo: use ht_keyindex like get
+get!(d::Associative, k, default) = has(d, k) ? d[k] : (d[k] = default)
+macro get!(d, k, default)
+    quote
+        d, k = $(esc(d)), $(esc(k))
+        has(d, k) ? d[k] : (d[k] = $(esc(default)))
+    end
+end
+macro get(d, k, default)
+    quote
+        d, k = $(esc(d)), $(esc(k))
+        has(d, k) ? d[k] : $(esc(default))
+    end
+end
+
 
 end # module
