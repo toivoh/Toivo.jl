@@ -2,7 +2,7 @@
 module Toivo
 using Base 
 export quot, is_expr, @sexpr, show_sexpr
-export @expect, split_fdef, @in
+export @expect, is_fdef, split_fdef, @in
 export get!, @get, @get!
 
 
@@ -73,6 +73,11 @@ macro expect(pred)
           $(string("expected: ", sprint(Base.show_unquoted, pred)", == true")))
     end
 end
+
+function is_fdef(ex::Expr) 
+    is_expr(ex,:function,2) || (is_expr(ex,:(=),2)&&is_expr(ex.args[1],:call))
+end
+is_fdef(ex) = false
 
 # Return the signature and body from a named method definition, either syntax.
 # E.g. split_fdef( :( f(x) = x^2) ) == (:(f(x)), :(x^2))
